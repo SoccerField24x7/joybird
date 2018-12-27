@@ -14,3 +14,7 @@
 Route::get('/', function () {
     return view('joybird');
 });
+
+Route::get('/superFancyChart', function () {
+	return view('chart');
+});
