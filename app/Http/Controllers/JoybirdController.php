@@ -25,15 +25,30 @@ class JoybirdController extends Controller
 		8 => 'vendors'
 	];
 
+	/**
+	 * Main method to load chart
+	 *
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
 	public function getChart()
 	{
-		/* data deferred to client-side call so promise can be used */
+		/* data deferred to client-side call to allow it to be interactive, and to utilize a promise */
 
 		return view('chart');
 	}
 
-	public function getChartData() : string
+	/**
+	 * Endpoint to return JSON data necessary to build chart
+	 *
+	 * @param Request $request
+	 * @return string
+	 */
+	public function getChartData(Request $request) : string
 	{
+		if(!$request->ajax()) {
+			return json_encode(['Error' => 'Invalid request.']);
+		}
+
 		/* for the sake of brevity, re-using existing SP and getting all rows */
 		$sql = "CALL joybird.JoybirdSales(0, 200, 'vendors', 'ASC')";
 
@@ -68,14 +83,28 @@ class JoybirdController extends Controller
 		return json_encode($dto);
 	}
 
+	/**
+	 * Main Method to load Report
+	 *
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
 	public function getReport()
 	{
 		return view('joybird');
 	}
 
-	//Because DataTables passes a query string, we cannot use Laravel routes, i.e. /1/43/67
-	public function getSalesByPage(Request $request) : string
+	/**
+	 *Endpoint to return JSON data necessary to build report
+	 *
+	 * @param Request $request
+	 * @return string
+	 */
+	public function getSalesByPage(Request $request) : string  //Because DataTables passes a query string, we cannot use Laravel routes, i.e. /1/43/67
 	{
+
+		if(!$request->ajax()) {
+			return json_encode(['Error' => 'Invalid request.']);
+		}
 
 		/* pick up the needed values passed by DataTables */
 		$start = $request->input('start');
@@ -118,6 +147,11 @@ class JoybirdController extends Controller
 		return json_encode($result);
 	}
 
+	/**
+	 * Return the total record count for report data
+	 *
+	 * @return int
+	 */
 	public function getSalesCount() : int
 	{
 		$result = 0;
