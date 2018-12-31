@@ -63,7 +63,6 @@ class JoybirdController extends Controller
 			return json_encode(['Error' => $error]);
 		}
 
-
 		Log::Create(
 			['message' => DB::connection()->getPdo()->quote($sql), 'added' => date('Y-m-d H:i:s')]
 		);
@@ -101,7 +100,6 @@ class JoybirdController extends Controller
 	 */
 	public function getSalesByPage(Request $request) : string  //Because DataTables passes a query string, we cannot use Laravel routes, i.e. /1/43/67
 	{
-
 		if(!$request->ajax()) {
 			return json_encode(['Error' => 'Invalid request.']);
 		}
