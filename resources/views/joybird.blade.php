@@ -20,7 +20,7 @@
                         <th>Sold Number</th>
                         <th>Sold Item</th>
                         <th>Default Purchase Price</th>
-                        <th>Container Unit pPrice</th>
+                        <th>Container Unit Price</th>
                         <th>Avg Sale Price (JAQ)</th>
                         <th>Total Purchased</th>
                         <th>Vendors</th>
