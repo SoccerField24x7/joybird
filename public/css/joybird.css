@@ -1,0 +1,17 @@
+#dtable {
+	table-layout: fixed;
+	width: 100% !important;
+}
+#dtable td,
+#dtable th{
+	width: auto !important;
+	white-space: normal;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+td {
+	font-size: 12px;
+}
+th {
+	font-size: 13px;
+}
