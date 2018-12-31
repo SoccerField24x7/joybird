@@ -36,7 +36,22 @@ class JoybirdController extends Controller
 	{
 		/* for the sake of brevity, re-using existing SP and getting all rows */
 		$sql = "CALL joybird.JoybirdSales(0, 200, 'vendors', 'ASC')";
-		$rows = DB::select($sql);
+
+		try {
+			$rows = DB::select($sql);
+		} catch (\Exception $ex) {
+			$error = $ex->getMessage();
+			Log::Create(
+				['message' => DB::connection()->getPdo()->quote($error), 'added' => date('Y-m-d H:i:s')]
+			);
+
+			return json_encode(['Error' => $error]);
+		}
+
+
+		Log::Create(
+			['message' => DB::connection()->getPdo()->quote($sql), 'added' => date('Y-m-d H:i:s')]
+		);
 
 		/* aggregate the data */
 		$dto = [];
@@ -77,10 +92,19 @@ class JoybirdController extends Controller
 		$sql = "CALL joybird.JoybirdSales($start, $length, '" . $this->columnNames[$orderby[0]['column']] . "', '" . strtoupper($orderby[0]['dir']) . "')";
 
 		Log::Create(
-			['message' => str_replace("'", "''", $sql), 'added' => date('Y-m-d H:i:s')]
+			['message' => DB::connection()->getPdo()->quote($sql), 'added' => date('Y-m-d H:i:s')]
 		);
 
-		$rows = DB::select($sql);
+		try {
+			$rows = DB::select($sql);
+		} catch (\Exception $ex) {
+			$error = $ex->getMessage();
+			Log::Create(
+				['message' => DB::connection()->getPdo()->quote($error), 'added' => date('Y-m-d H:i:s')]
+			);
+
+			return json_encode(['error' => $error]);
+		}
 
 		$noRecords = $this->getSalesCount();
 
@@ -96,12 +120,20 @@ class JoybirdController extends Controller
 
 	public function getSalesCount() : int
 	{
-		$result = DB::select("CALL joybird.JoybirdSalesCount()");
+		$result = 0;
+
+		try {
+			$result = DB::select("CALL joybird.JoybirdSalesCount()");
+		} catch (\Exception $ex) {
+			Log::Create(
+				['message' => DB::connection()->getPdo()->quote($ex->getMessage()), 'added' => date('Y-m-d H:i:s')]
+			);
+		}
 
 		return count($result);
 	}
 
-	private function toArray($array) : array
+	private function toArray(array $array) : array
 	{
 		$result = [];
 		foreach($array as $row) {
