@@ -18,10 +18,24 @@
 @section('javascript')
     <script src="https://code.highcharts.com/highcharts.src.js"></script>
     <script type="text/javascript">
-
         $(document).ready(function() {
-            getChartData().then(buildChart);
+            getChartData().then(buildChart).catch(function(err) {
+                showError(err);
+            });
         });
+
+        function showError(err) {
+            let message = '';
+            if (typeof err.message !== 'undefined') {
+                message = err.message;
+            }
+
+            if (typeof err.Error !== 'undefined') {
+                message = err.Error
+            }
+
+            alert(message);
+        }
 
         function getChartData() {
             const prom = new Promise(function(resolve, reject) {
@@ -31,13 +45,17 @@
                         format: 'json'
                     },
                     error: function(err) {
-                        reject(err)
+                        reject(err.responseJSON);
                     },
-                    //dataType: 'jsonp',
                     success: function (data) {
                         let obj = JSON.parse(data);
 
-                        //fulfill promise
+                        /* catch error passed from controller */
+                        if (typeof obj.Error !== 'undefined') {
+                            reject(obj);
+                        }
+
+                        /* fulfill promise */
                         resolve(obj);
                     },
                     type: 'POST'
