@@ -11,8 +11,9 @@
 |
 */
 
-Route::get('/{pageNum?}/{pageSize?}', 'JoybirdController@getSalesByPage');
-
-Route::get('/superFancyChart', function () {
-	return view('chart');
-});
+Route::get('/joybird', 'JoybirdController@getReport');
+Route::get('/report', 'JoybirdController@getSalesByPage');
+Route::post('/report', 'JoybirdController@getSalesByPage');
+Route::get('/count', 'JoybirdController@getSalesCount');
+Route::get('/chart', 'JoybirdController@getChart');
+Route::post('/chartdata', 'JoybirdController@getChartData');
