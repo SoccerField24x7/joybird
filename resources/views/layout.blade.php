@@ -39,13 +39,13 @@
             <div class="col-md-12 text-center">
                 <div class="row">
                     <div class="col-md-4">
-                        <a href="#">Jesse on LinkedIn</a>
+                        <a href="https://www.linkedin.com/in/jesse-quijano/">Jesse on LinkedIn</a>
                     </div>
                     <div class="col-md-4">
-                        <a href="#">Jesse on Exercism.io</a>
+                        <a href="https://exercism.io/profiles/CodeNja">Jesse on Exercism.io</a>
                     </div>
                     <div class="col-md-4">
-                        <a href="#">Jesse on GitHub</a>
+                        <a href="https://github.com/SoccerField24x7">Jesse on GitHub</a>
                     </div>
                 </div>
             </div>
