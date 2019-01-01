@@ -1,4 +1,4 @@
-#Joybird Code Challenge
+# Joybird Code Challenge
 Thank you for the opportunity to complete your code challenge!  I love these things.
 
 ## Challenge 1 - SQL Tuning
