@@ -1,65 +1,49 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+#Joybird Code Challenge
+Thank you for the opportunity to complete your code challenge!  I love these things.
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+## Challenge 1 - SQL Tuning
+The original code executed poorly taking nearly 20 seconds to return a resultset. After removing the section of code causing the drag on the system, and moving the data selection to a sub-query, the execution time was reduced to ~0.5 seconds.
 
-## About Laravel
+```sql
+SET sql_mode='';
+SELECT
+	p1.part_number AS bought_number,
+	p1.part_desc AS bought_item,
+	p2.part_number AS sold_number,
+	p2.part_desc AS sold_item,
+	p1.defaut_purchase_price,
+	p1.container_unit_price,
+	(SELECT AVG(oc.discounted_cost / oc.quantity) FROM order_cart AS oc JOIN bom_part_sku_relation AS bpkr ON oc.fk_product_id=bpkr.fk_product_id WHERE bpkr.fk_part_id=p2.part_id) AS JAQ,
+	ROUND( SUM( pocf.quantity ) ) AS total_purchased,
+	GROUP_CONCAT( DISTINCT ( s.supplier_name ) SEPARATOR '<br />' ) AS vendors 
+FROM
+	part_tags t,
+	bom_parts p1
+	LEFT JOIN bom_part_tree pt ON p1.part_id = pt.fk_part_id
+	LEFT JOIN bom_parts p2 ON p2.part_id = pt.fk_parent_id
+	LEFT JOIN bom_po_cart_final pocf ON pocf.fk_part_id = p1.part_id
+	LEFT JOIN bom_purchase_orders po ON po.po_id = pocf.fk_po_id
+	LEFT JOIN bom_suppliers s ON s.supplier_id = po.fk_supplier_id 
+WHERE
+	t.fk_part_id = p1.part_id 
+	AND t.type_label = 'EFG' 
+GROUP BY
+	p1.part_id 
+ORDER BY
+	total_purchased DESC
+```
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
+## Challenge 2 - Implement DataTables
+I decided to implement server-side paging, because it's a pain in the ass.  What's the fun in selecting < 200 records and passing the entire data set to the library? :)  Server-side paging requires that you do a lot of the heavy lifting yourself rather than letting the library handle it. More on that in the design decisions...
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Design decisions:
+* Utilized a stored procedure to ensure the fastest retrieval possible.
+* Implemented sorting for all columns.  This meant I would need to create a dynamic way to pass the column and sort direction into the SP. This is shown in the database/seeds/ directory.  P.S. MySQL doesn't like SP parameters for column names.
+* Did not implement search (and hid the default search box).
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
+## Challenge 3 - Implement Chart (HighCharts)
+Used the HighCharts library.
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
-
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Design decisions:
+* Used AJAX instead of passing data from the controller.  Although this one isn't, most charts are interactive and need to be able to refresh their data without a page reload.
+* Utilized JavaScript promises. The speed of the data load didn't warrant it, but it is important to ensure you have a data set before you start drawing the chart.
